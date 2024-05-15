@@ -124,6 +124,7 @@ def make_masks_consist(results, init_masks, frame_names, labels: np.array, TRASH
   print('Make current masks consistent')
 
   for i in tqdm(range(results.shape[0])):
+
     IOU_matrix = cupy_get_IOU(results[i, ...], init_masks[i])
 
     sam_masks_ind  = np.argmax(IOU_matrix, axis=1)
@@ -143,7 +144,7 @@ def make_masks_consist(results, init_masks, frame_names, labels: np.array, TRASH
     remain_ind = np.setdiff1d(np.arange(IOU_matrix.shape[1]), sam_masks_ind[ind_bool_mask])
     init_masks[i] = init_masks[i][remain_ind]
 
-  return init_masks
+  return init_masks[1:]
 
 
 if __name__ == '__main__':
@@ -200,11 +201,3 @@ if __name__ == '__main__':
 
   
   print(' === Finish ===\n')
-
-  
-  # for i in tqdm(range(180)):
-  #   # np.save(os.path.join(out_path, f'masks_frame_{str(i+1).zfill(5)}.npy'), np.array(results[i]))
-
-  #   frame_masks = 255*np.array(del_results[i]).mean(0)
-  #   plt.imshow(frame_masks)
-  #   plt.savefig(f"trash/frame_{str(i+1).zfill(5)}.jpg")
