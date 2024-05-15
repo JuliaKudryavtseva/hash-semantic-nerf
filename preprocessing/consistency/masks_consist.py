@@ -54,7 +54,7 @@ def get_labels(counter, num_masks_in_frame):
   return np.arange(counter+1, counter+1+num_masks_in_frame)[..., None, None], counter+num_masks_in_frame
 
 
-def find_curr_mask_on_frames(processor, inp_path, frame_names, mask):
+def find_curr_mask_on_frames(processor, start_frame_ind, inp_path, frame_names, mask):
   '''
   Input: 
     processor (torch model): Xmem model
@@ -65,6 +65,9 @@ def find_curr_mask_on_frames(processor, inp_path, frame_names, mask):
   Output:
     current_masks (list): masks of objects as np array 
   '''
+
+
+  frame_names = frame_names[start_frame_ind:]
 
   current_masks = []
   frames_to_propagate = len(frame_names)
@@ -98,7 +101,7 @@ def find_curr_mask_on_frames(processor, inp_path, frame_names, mask):
 
 
 
-def process_frame_masks(first_frame_masks, network):
+def process_frame_masks(first_frame_masks, start_frame_ind,  network):
   print(' === Process set of masks with Xmem === ')
   final_masks=[]
   for label, init_mask in enumerate(tqdm(first_frame_masks), 1):
@@ -112,7 +115,7 @@ def process_frame_masks(first_frame_masks, network):
     processor.set_all_labels(range(1, num_objects+1)) # consecutive labels
 
     # get sequence of masks
-    current_masks = find_curr_mask_on_frames(processor, inp_path, frame_names, mask)    
+    current_masks = find_curr_mask_on_frames(processor, start_frame_ind, inp_path, frame_names, mask)    
     final_masks.append(current_masks)
 
   final_masks = np.array(final_masks)  # s, 180, h, w 
@@ -191,7 +194,7 @@ if __name__ == '__main__':
   for i in range(len(init_masks)):
     print(f'Frame: {i}')
 
-    results = process_frame_masks(init_masks[i], network) # num_frames, num_mask, H, W
+    results = process_frame_masks(init_masks[i], i, network) # num_frames, num_mask, H, W
     # make frame consistant with IOU metrics
     labels, COUNTER = get_labels(COUNTER, results.shape[1])
     init_masks = make_masks_consist(results, init_masks, frame_names, labels)
