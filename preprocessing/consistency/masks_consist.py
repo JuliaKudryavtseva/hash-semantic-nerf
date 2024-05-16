@@ -138,7 +138,6 @@ def make_masks_consist(results, init_masks, curr_frame_ind, frame_names, labels:
     # save cons_masks
     for con_ind in range(cons_masks.shape[0]):
       save_index = np.unique(cons_masks[con_ind])[1]
-      print(i, os.path.join(out_path, frame_names[curr_frame_ind+i].replace('.jpg', ''), f'{save_index}.npy'))
       np.save(
         os.path.join(out_path, frame_names[curr_frame_ind+i].replace('.jpg', ''), f'{save_index}.npy'), 
         cons_masks[con_ind]
@@ -195,7 +194,6 @@ if __name__ == '__main__':
   for i in range(len(init_masks)):
     print(f'Frame: {i}')
     if init_masks[i].shape[0] > 0:
-      print(len(init_masks), [len(m) for m in init_masks])
 
       results = process_frame_masks(init_masks[i], i, network) # num_frames, num_mask, H, W
       print(results.shape)
