@@ -123,31 +123,32 @@ def process_frame_masks(first_frame_masks, start_frame_ind,  network):
   return final_masks
 
 
-def make_masks_consist(results, init_masks, frame_names, labels: np.array, TRASHOLD=0.7):
+def make_masks_consist(results, init_masks, curr_frame_ind, frame_names, labels: np.array, TRASHOLD=0.7):
   print('Make current masks consistent')
 
   for i in tqdm(range(results.shape[0])):
 
-    IOU_matrix = cupy_get_IOU(results[i, ...], init_masks[i])
+    IOU_matrix = cupy_get_IOU(results[i, ...], init_masks[curr_frame_ind+i])
 
     sam_masks_ind  = np.argmax(IOU_matrix, axis=1)
     ind_bool_mask = np.max(IOU_matrix, axis=1) > TRASHOLD
-    cons_masks = labels*init_masks[i][sam_masks_ind]
+    cons_masks = labels*init_masks[curr_frame_ind+i][sam_masks_ind]
     cons_masks = cons_masks[ind_bool_mask] # number_masks, H, W
 
     # save cons_masks
     for con_ind in range(cons_masks.shape[0]):
       save_index = np.unique(cons_masks[con_ind])[1]
+      print(i, os.path.join(out_path, frame_names[curr_frame_ind+i].replace('.jpg', ''), f'{save_index}.npy'))
       np.save(
-        os.path.join(out_path, frame_names[i].replace('.jpg', ''), f'{save_index}.npy'), 
+        os.path.join(out_path, frame_names[curr_frame_ind+i].replace('.jpg', ''), f'{save_index}.npy'), 
         cons_masks[con_ind]
         )
 
     # remove from 
     remain_ind = np.setdiff1d(np.arange(IOU_matrix.shape[1]), sam_masks_ind[ind_bool_mask])
-    init_masks[i] = init_masks[i][remain_ind]
+    init_masks[curr_frame_ind+i] = init_masks[curr_frame_ind+i][remain_ind]
 
-  return init_masks[1:]
+  return init_masks
 
 
 if __name__ == '__main__':
@@ -189,16 +190,19 @@ if __name__ == '__main__':
   network = XMem(config, './saves/XMem.pth').eval().to(device)
 
   # process masks from first set
-  print(' === Start ===\n')
+  print('\n === Start ===\n')
 
   for i in range(len(init_masks)):
     print(f'Frame: {i}')
+    if init_masks[i].shape[0] > 0:
+      print(len(init_masks), [len(m) for m in init_masks])
 
-    results = process_frame_masks(init_masks[i], i, network) # num_frames, num_mask, H, W
-    # make frame consistant with IOU metrics
-    labels, COUNTER = get_labels(COUNTER, results.shape[1])
-    init_masks = make_masks_consist(results, init_masks, frame_names, labels)
-
+      results = process_frame_masks(init_masks[i], i, network) # num_frames, num_mask, H, W
+      print(results.shape)
+      # make frame consistant with IOU metrics
+      labels, COUNTER = get_labels(COUNTER, results.shape[1])
+      init_masks = make_masks_consist(results, init_masks, i, frame_names, labels)
+    
     print()
 
 
