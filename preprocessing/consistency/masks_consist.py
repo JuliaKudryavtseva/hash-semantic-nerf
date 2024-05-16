@@ -196,7 +196,6 @@ if __name__ == '__main__':
     if init_masks[i].shape[0] > 0:
 
       results = process_frame_masks(init_masks[i], i, network) # num_frames, num_mask, H, W
-      print(results.shape)
       # make frame consistant with IOU metrics
       labels, COUNTER = get_labels(COUNTER, results.shape[1])
       init_masks = make_masks_consist(results, init_masks, i, frame_names, labels)
