@@ -20,20 +20,12 @@ docker rmi -f kudryavtseva.prepro_const
 
 docker build -t kudryavtseva.prepro_const -f preprocessing/consistency/Dockerfile  .
 
-docker run --rm --gpus device=5 \
+docker run --rm --gpus device=4 \
             -e "DATA_PATH=$DATA_PATH" \
             -v $PWD/data:/XMem/data \
             --name kudryavtseva.prepro_const \
             kudryavtseva.prepro_const 
 
-
-
-docker run --rm --gpus device=1 \
-            -e "DATA_PATH=$DATA_PATH" \
-            -v $PWD/preprocessing/consistency/XMem:/XMem \
-            -v $PWD/data:/XMem/data \
-            --name kudryavtseva.prepro_const \
-            kudryavtseva.prepro_const
 
 
 
