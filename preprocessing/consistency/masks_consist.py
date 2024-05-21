@@ -159,6 +159,7 @@ if __name__ == '__main__':
   inp_path = os.path.join('data', DATA_PATH, 'images')
   out_path = os.path.join('data', DATA_PATH, 'consistent_masks')
   seg_path = os.path.join('data', DATA_PATH, 'segmentation_results')
+  logs_path = os.path.join(out_path, 'logs.txt')
 
   os.makedirs(out_path, exist_ok=True)
 
@@ -166,6 +167,7 @@ if __name__ == '__main__':
   device = 'cuda'
   num_objects = 1
   COUNTER = 0
+  
 
   # images name
   frame_names = sorted(os.listdir(inp_path), key=lambda x: int(x.split('.')[0].split('_')[1]))
@@ -189,7 +191,10 @@ if __name__ == '__main__':
   network = XMem(config, './saves/XMem.pth').eval().to(device)
 
   # process masks from first set
+  START_TIME = time.time()
   print('\n === Start ===\n')
+  with open(logs_path, 'a') as logs:
+    logs.write('=== Start ===\n')
 
   for i in range(len(init_masks)):
     print(f'Frame: {i}')
@@ -199,9 +204,21 @@ if __name__ == '__main__':
       # make frame consistant with IOU metrics
       labels, COUNTER = get_labels(COUNTER, results.shape[1])
       init_masks = make_masks_consist(results, init_masks, i, frame_names, labels)
+
+      # logs
+      with open(logs_path, 'a') as logs:
+        logs.write(f'Frame: {i}\n')
     
     print()
 
 
-  
+
   print(' === Finish ===\n')
+  FINISH_TIME = time.time()
+  time_spent = FINISH_TIME-START_TIME
+  time_spent_min = time_spent/60
+  time_spent_hour = time_spent_min/60
+
+  with open(logs_path, 'a') as logs:
+      logs.write(f'TIME in {time_spent} s., in {time_spent_min} min., in {time_spent_hour} h.')
+      logs.write(f'\n === Finish ===\n')
