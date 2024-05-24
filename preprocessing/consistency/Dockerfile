@@ -27,6 +27,13 @@ RUN wget -P ./saves/ https://github.com/hkchengrex/XMem/releases/download/v1.0/X
 # copy files
 COPY preprocessing/consistency/masks_consist.py masks_consist.py
 COPY preprocessing/consistency/multi_iou.py multi_iou.py
+COPY preprocessing/consistency/squeeze.py squeeze.py
+COPY preprocessing/consistency/clear_dataset.py clear_dataset.py
 
-# run
-CMD python3 masks_consist.py
+COPY preprocessing/consistency/run.sh run.sh
+RUN chmod a+x run.sh
+CMD ["./run.sh"]
+
+# # run
+# CMD python3 masks_consist.py
+# CMD python3 squeeze.py
