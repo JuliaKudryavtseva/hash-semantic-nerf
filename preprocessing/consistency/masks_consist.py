@@ -128,24 +128,27 @@ def make_masks_consist(results, init_masks, curr_frame_ind, frame_names, labels:
 
   for i in tqdm(range(results.shape[0])):
 
-    IOU_matrix = cupy_get_IOU(results[i, ...], init_masks[curr_frame_ind+i])
+    n_xmm, n_sam = results[i, ...].shape[0], init_masks[curr_frame_ind+i].shape[0]
 
-    sam_masks_ind  = np.argmax(IOU_matrix, axis=1)
-    ind_bool_mask = np.max(IOU_matrix, axis=1) > TRASHOLD
-    cons_masks = labels*init_masks[curr_frame_ind+i][sam_masks_ind]
-    cons_masks = cons_masks[ind_bool_mask] # number_masks, H, W
+    if n_xmm > 0 and n_sam > 0:
+      IOU_matrix = cupy_get_IOU(results[i, ...], init_masks[curr_frame_ind+i])
 
-    # save cons_masks
-    for con_ind in range(cons_masks.shape[0]):
-      save_index = np.unique(cons_masks[con_ind])[1]
-      np.save(
-        os.path.join(out_path, frame_names[curr_frame_ind+i].replace('.jpg', ''), f'{save_index}.npy'), 
-        cons_masks[con_ind]
-        )
+      sam_masks_ind  = np.argmax(IOU_matrix, axis=1)
+      ind_bool_mask = np.max(IOU_matrix, axis=1) > TRASHOLD
+      cons_masks = labels*init_masks[curr_frame_ind+i][sam_masks_ind]
+      cons_masks = cons_masks[ind_bool_mask] # number_masks, H, W
 
-    # remove from 
-    remain_ind = np.setdiff1d(np.arange(IOU_matrix.shape[1]), sam_masks_ind[ind_bool_mask])
-    init_masks[curr_frame_ind+i] = init_masks[curr_frame_ind+i][remain_ind]
+      # save cons_masks
+      for con_ind in range(cons_masks.shape[0]):
+        save_index = np.unique(cons_masks[con_ind])[1]
+        np.save(
+          os.path.join(out_path, frame_names[curr_frame_ind+i].replace('.jpg', ''), f'{save_index}.npy'), 
+          cons_masks[con_ind]
+          )
+
+      # remove from 
+      remain_ind = np.setdiff1d(np.arange(IOU_matrix.shape[1]), sam_masks_ind[ind_bool_mask])
+      init_masks[curr_frame_ind+i] = init_masks[curr_frame_ind+i][remain_ind]
 
   return init_masks
 
