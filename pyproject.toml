@@ -1,0 +1,19 @@
+[project]
+name = "hash_nerf"
+description = "Repository for thesis in nerfstudio."
+version = "0.1.0"
+
+dependencies = [
+    "timm",
+    "ftfy",
+    "regex",
+    "tqdm",
+    "nerfstudio >= 0.3.0"
+    ] 
+
+[tool.setuptools.packages.find]
+include = ["hash_nerf*"]
+
+# register the entry point of your new method here:
+[project.entry-points.'nerfstudio.method_configs']
+hash_nerf = 'hash_nerf.hash_nerf_config:hash_nerf_method'
