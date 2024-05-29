@@ -6,6 +6,7 @@ import argparse
 import time 
 
 import numpy as np
+import matplotlib.pyplot as plt
 from segment_anything import sam_model_registry, SamAutomaticMaskGenerator, SamPredictor
 
 
@@ -54,11 +55,11 @@ if __name__ == '__main__':
         image =Image.open(image_path)
         image = image.convert('RGB')
         image_array = np.array(image)
+        H, W, _ = image_array.shape
+
         
         # SAM segmentation
         sam_results = mask_generator.generate(image_array)
-        # sort by area
-        sam_results = sorted(sam_results, key=lambda x: x['area'], reverse=True)
 
         # save numpy masks in save_path
         path_frame = os.path.join(save_path, 'numpy_masks', image_pill.split('.')[0])
