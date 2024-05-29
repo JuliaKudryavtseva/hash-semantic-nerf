@@ -111,40 +111,15 @@ class HashNerfModel(Model):
         
         super().__init__(config=config, **kwargs)
 
-        # data_path = os.environ['DATA_PATH']
-        # self.labels_n_dims = int(np.load(f"data/{data_path}/consistent_masks/number_class.npy") + 1)
-        # self.colors = random_colors(self.labels_n_dims).cuda()
-
-        # with open(f"data/{data_path}/consistent_masks/label_map_colors.pkl", 'rb') as h:
-        #     self.colors = pickle.load(h)
-
-        # # DICT WITH SAM EMBEDDINGS
-
-        # data_path = os.environ['DATA_PATH']
-        # path_masks = f"data/{data_path}/consistent_masks/ready_masks/" #figurines
-        # self.pickle_labels = {}
-        # print('Load dataset')
-        # for fname in tqdm(os.listdir(path_masks)):
-        #     with open(path_masks + fname, 'rb') as h:
-        #         label_emb_dict = pickle.load(h)
-        #     self.pickle_labels[int(fname.split("_")[1])] = label_emb_dict
-
-        # # DICT WITH SAM EMBEDDINGS
-
-        
-
 
     def populate_modules(self):
         """Set the fields and modules."""
         super().populate_modules()
 
-        # # CREATE SAM MODEL
-        # self.positive_input = ViewerText("Text Positives", "", cb_hook=self.gui_cb)
-        # # CREATE SAM MODEL
+        
         data_path = os.environ['DATA_PATH']
         self.class_weights = torch.tensor(np.load(f"data/{data_path}/consistent_masks/weights.npy")) 
 
-        # self.class_weights[0] = 0.1
         self.labels_n_dims = int(np.load(f"data/{data_path}/consistent_masks/number_class.npy"))+1
         self.colors = random_colors(self.labels_n_dims).cuda()
         
@@ -190,12 +165,7 @@ class HashNerfModel(Model):
         # losses
         self.rgb_loss = MSELoss()
 
-        # class_weights=torch.ones(self.labels_n_dims)
-        # class_weights[0]=0.1
-        # weight=self.class_weights
-
-        # self.class_weights[self.class_weights > 0.09] = 1
-        self.semantic_loss = torch.nn.CrossEntropyLoss(weight=self.class_weights)
+        self.semantic_loss = torch.nn.CrossEntropyLoss()
 
         # metrics
         self.psnr = PeakSignalNoiseRatio(data_range=1.0)
@@ -207,15 +177,6 @@ class HashNerfModel(Model):
         self.positives = 1
 
 
-    # # TOKENIZER FOR TEXT PROMPT
-    # def gui_cb(self,element):
-    #     self.set_positives(element.value.split(";"))
-
-    # def set_positives(self, text):
-    #     self.positives = int(text[0])
-        
-
-    # # TOKENIZER FOR TEXT PROMPT 
 
     def get_training_callbacks(
         self, training_callback_attributes: TrainingCallbackAttributes
@@ -344,35 +305,14 @@ class HashNerfModel(Model):
         batch['semantics'] = torch.nn.functional.one_hot(batch['semantics'].long(), num_classes=self.labels_n_dims)
 
 
-        # batch["true_hash_labels"] = []
-        # for ind_frame, ind_label in zip(batch['frame_number'], batch['labels_map']):
-        #     frame_labels = self.pickle_labels[int(ind_frame)]
-        #     one_hot_labels = torch.zeros(self.labels_dim, dtype=int)
-
-        #     if int(ind_label) in frame_labels.keys():
-        #         labels = frame_labels[int(ind_label)]
-        #         # one_hot_labels[:len(labels)] = torch.tensor(labels)
-        #         one_hot_labels[labels] = 1
-        #     else:
-        #         one_hot_labels[0]= 1 
-            
-        #     batch["true_hash_labels"].append(one_hot_labels)
-
-        # batch["true_hash_labels"] = torch.tensor(np.array(batch['true_hash_labels'])).cuda().float()
-
-        
         
 
         if self.training:
-            # if outputs["pred_labels"].isnan().sum().item(): 
-            #     loss = 1e-6
-            #     print('=== Outputs with NANs === ')
-            # else:
+          
             loss_semantics = self.semantic_loss(outputs["pred_labels"], batch["semantics"].float())
             loss_dict["sam_loss"] = self.config.sem_loss_weight*loss_semantics.nanmean()
 
         del batch["semantics"]
-        # del outputs["pred_labels"]
         torch.cuda.empty_cache()
         
         return loss_dict
@@ -430,22 +370,12 @@ class HashNerfModel(Model):
 
         train = True
         if train == True:
-            return self.colors[semantics_output] 
+            return self.colors[semantics_output.reshape(-1)]
         else:
             prediction = torch.zeros((semantics_output.shape[0], 3))
             prediction[:, 0] = semantics_output
             return prediction
 
-        
-
-        
-        
-
-
-
-        
-
-    # MODEL PREDICITON
     @torch.no_grad()
     def get_outputs_for_camera_ray_bundle(self, camera_ray_bundle: RayBundle) -> Dict[str, torch.Tensor]:
         # Takes in camera parameters and computes the output of the model.
@@ -463,7 +393,6 @@ class HashNerfModel(Model):
             for output_name, output in outputs.items():  
                 outputs_lists[output_name].append(output)
 
-        # SAM RELEVANCY
         outputs = {}
         for output_name, outputs_list in outputs_lists.items():
             outputs[output_name] = torch.cat(outputs_list).view(image_height, image_width, -1)
