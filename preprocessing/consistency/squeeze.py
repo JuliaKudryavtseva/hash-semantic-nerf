@@ -61,7 +61,7 @@ if __name__ == '__main__':
     DATA_PATH = os.environ['DATA_PATH']
     assert len(DATA_PATH) > 0
 
-    USER_GUIDE = True
+    USER_GUIDE = False
 
 
     inp_path = os.path.join('data', DATA_PATH, 'consistent_masks')
@@ -132,7 +132,6 @@ if __name__ == '__main__':
 
     print(' === Relabeling === ')
     unique_labels, counts = np.unique(dataset_labels, return_counts=True)
-    print(unique_labels)
 
     if USER_GUIDE:
         counts[:2]=int(np.mean(counts))
@@ -176,10 +175,15 @@ if __name__ == '__main__':
         hash_masks = get_new_mask(frame_hash_masks, (H, W), relabel_dict)
 
 
-        np.save(os.path.join(out_path, frame_names[ind]), hash_masks)
+        # np.save(os.path.join(out_path, frame_names[ind]), hash_masks)
 
         # # COLORS
-        # color_res = get_color_img(hash_masks, colors, (H, W))
+
+
+
+        color_res = get_color_img(hash_masks, colors, (H, W))
+        im = Image.fromarray(np.uint8(color_res))
+        im.save(os.path.join(color_out_path, frame_names[ind].replace('.npy', '.jpg')))
         # plt.imshow(color_res)
         # plt.savefig(os.path.join(color_out_path, frame_names[ind].replace('.npy', '.jpg')))
 
