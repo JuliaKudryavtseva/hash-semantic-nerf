@@ -157,9 +157,6 @@ if __name__ == '__main__':
     np.save(os.path.join(inp_path, 'weights.npy'), 1/counts)
 
 
-
-
-
     # for all dataset
     relabel_dict = {old_lab:new_lab for (old_lab, new_lab) in zip(unique_labels, new_labels)}
     relabel_dict[0] = 0
@@ -174,16 +171,11 @@ if __name__ == '__main__':
     for ind, frame_hash_masks in enumerate(tqdm(dataset)):
         hash_masks = get_new_mask(frame_hash_masks, (H, W), relabel_dict)
 
-
-        # np.save(os.path.join(out_path, frame_names[ind]), hash_masks)
-
-        # # COLORS
+        np.save(os.path.join(out_path, frame_names[ind]), hash_masks)
 
 
-
+        # COLORS
         color_res = get_color_img(hash_masks, colors, (H, W))
         im = Image.fromarray(np.uint8(color_res))
         im.save(os.path.join(color_out_path, frame_names[ind].replace('.npy', '.jpg')))
-        # plt.imshow(color_res)
-        # plt.savefig(os.path.join(color_out_path, frame_names[ind].replace('.npy', '.jpg')))
-
+        
