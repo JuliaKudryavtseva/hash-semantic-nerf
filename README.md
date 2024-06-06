@@ -1,7 +1,7 @@
 # Hash-Semantic-NeRF
 
 
-Training     
+Architecture     
 :-------------------------:
 ![](https://github.com/JuliaKudryavtseva/hash-semantic-nerf/blob/main/assets/training.png)  
 ## Installation
