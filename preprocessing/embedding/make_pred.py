@@ -47,12 +47,23 @@ def get_mask(mask):
 
     return mask
 
+
+# parsing args
+def parse_args():
+
+    parser = argparse.ArgumentParser(description ='args for algorithm which makes frame consistant')
+
+    parser.add_argument('--text-prompt', type=str, default='teddy bear',  help='Text prompt for masks predicting masks.')
+    return parser.parse_args()
+
 if __name__ == '__main__':
 
     DATA_PATH = os.environ['DATA_PATH']
     assert len(DATA_PATH) > 0
 
-    TEXT_PROMPT = 'fridge'
+    args = parse_args()
+
+    TEXT_PROMPT = args.text_prompt
 
 
     nerf_path = os.path.join('data', 'nerf_prediction', DATA_PATH, 'raw-pred_labels')
@@ -111,12 +122,10 @@ if __name__ == '__main__':
         mask2 = (nerf_masks == label2).astype(int)
         mask = np.clip(mask1+mask2, 0, 1)
 
-        if np.sum(mask) > 0:
-            mask = get_mask(mask)
-
     
         # save
         np.save(os.path.join(out_path, frame_name.replace('.gz', '')), mask)
+        
         # show
         plt.imshow(mask)
         plt.savefig(os.path.join(vis_path, frame_name.replace('.npy.gz', '.jpg')))
