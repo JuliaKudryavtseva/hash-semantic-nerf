@@ -1,5 +1,9 @@
-# hash-semantic-nerf
+# Hash-Semantic-NeRF
 
+
+Training     |  Inference
+:-------------------------:|:-------------------------:
+![](https://github.com/JuliaKudryavtseva/hash-semantic-nerf/blob/main/assets/training.png)  |  ![](https://github.com/JuliaKudryavtseva/hash-semantic-nerf/blob/main/assets/inference.png)
 
 ## Installation
 0. Install Nerfstudio dependencies including "tinycudann" to install dependencies 
