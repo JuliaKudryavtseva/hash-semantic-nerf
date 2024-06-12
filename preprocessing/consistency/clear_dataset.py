@@ -45,7 +45,10 @@ def get_relabel(path, frame_names):
     return relabel_map
 
 if __name__ == '__main__':
-    path = 'data/teatime/consistent_masks'
+    DATA_PATH = os.environ['DATA_PATH']
+    assert len(DATA_PATH) > 0
+
+    path = os.path.join('data', DATA_PATH, 'consistent_masks')
     frame_names = os.listdir(path)
     frame_names.remove('logs.txt')
     if "label_map_colors.pkl" in frame_names:
@@ -62,6 +65,7 @@ if __name__ == '__main__':
     # # RENAME
     frame_names =  sorted(frame_names, key=lambda x: int(x.split('_')[1]))
     relabel_map = get_relabel(path, frame_names)
+    print(relabel_map)
     for name in tqdm(frame_names):
         frame_path = os.path.join(path, name)
         frame_labels = sorted(os.listdir(frame_path), key=lambda x: int(x.split('.')[0]))

@@ -2,7 +2,8 @@ FROM ubuntu:22.04
 
 # install app dependencies
 RUN apt-get update && apt-get install -y python3 python3-pip
-RUN pip install numpy torch torchvision tqdm opencv-python
+RUN pip install numpy tqdm opencv-python matplotlib
+RUN pip install torch torchvision
 # RUN apt update && apt install zip
 
 RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y 
