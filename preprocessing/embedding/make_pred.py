@@ -9,6 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import gzip
 import cv2
+import argparse
 
 
 def vis(mask_bbox, mask):
